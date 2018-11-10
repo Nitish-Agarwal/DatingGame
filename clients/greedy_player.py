@@ -1,4 +1,6 @@
 import json
+from random import randint
+from random import shuffle
 
 from clients.client import Player
 
@@ -46,5 +48,14 @@ class Player(Player):
         specified as decimal values having at most two digits to the right of the decimal point, e.g. 0.13 but not 0.134
         Also the sum of negative weights must be -1 and the sum of positive weights must be 1.
         """
-
-        return [1, -1] + [0 for i in range(self.n - 2)]
+        if candidate_history == 0:
+            weights = [0.0] * self.n
+            for i in range(100):
+                rand_idx1 = randint(0, self.n / 2 - 1)
+                rand_idx2 = randint(self.n / 2, self.n - 1)
+                weights[rand_idx1] += 0.01
+                weights[rand_idx2] -= 0.01
+            shuffle(weights)
+            print(weights)
+            return weights         
+        return self.current_weights
