@@ -53,8 +53,8 @@ class Player(Player):
             for i in range(100):
                 rand_idx1 = randint(0, self.n / 2 - 1)
                 rand_idx2 = randint(self.n / 2, self.n - 1)
-                weights[rand_idx1] += 0.01
-                weights[rand_idx2] -= 0.01
+                weights[rand_idx1] = round(weights[rand_idx1] + 0.01, 2)
+                weights[rand_idx2] = round(weights[rand_idx2] - 0.01, 2)
             shuffle(weights)
             print(weights)
             return weights         
