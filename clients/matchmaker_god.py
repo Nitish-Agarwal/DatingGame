@@ -1,5 +1,6 @@
 import json
 from random import random
+import numpy as np
 
 from clients.client import Player
 
@@ -46,5 +47,13 @@ class MatchMaker(Player):
         For this function, you must return an array of values that lie between 0 and 1 inclusive and must have four or
         fewer digits of precision. The length of the array should be equal to the number of attributes (self.n)
         """
+        if self.prev_candidate['iter'] == 0:
+            return self.__first_candidate__()
+        else:
+            return self.__subsequent_candidates__()
 
+    def __first_candidate__(self):
+        return return [round(random(), 4) for i in range(self.n)]
+
+    def __subsequent_candidate__(self):
         return [round(random(), 4) for i in range(self.n)]

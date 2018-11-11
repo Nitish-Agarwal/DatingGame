@@ -48,26 +48,33 @@ class Player(Player):
         Also the sum of negative weights must be -1 and the sum of positive weights must be 1.
         """
         if candidate_history == 0:
-            n = self.n
-            half_n = (n + 1) // 2
-            weights = [0.0] * n
+            return self.__initial_parameters__()
+        else
+            return self.__update_parameters__(candidate_history)
 
-            # Strategy 1
-            # for i in range(100):
-            #     rand_idx1 = random.randint(0, half_n - 1)
-            #     rand_idx2 = random.randint(half_n, n - 1)
-            #     weights[rand_idx1] += 0.01
-            #     weights[rand_idx2] -= 0.01
+    def __initial_parameters__(self):
+        n = self.n
+        half_n = (n + 1) // 2
+        weights = [0.0] * n
 
-            # Strategy 2
-            idx1, idx2 = (0, 0)
-            for i in range(100):
-                weights[idx1] += 0.01
-                weights[half_n + idx2] -= 0.01
-                idx1 = (idx1 + 1) % half_n
-                idx2 = (idx2 + 1) % (n - half_n)
+        # Strategy 1
+        # for i in range(100):
+        #     rand_idx1 = random.randint(0, half_n - 1)
+        #     rand_idx2 = random.randint(half_n, n - 1)
+        #     weights[rand_idx1] += 0.01
+        #     weights[rand_idx2] -= 0.01
 
-            random.shuffle(weights)
-            print(weights)
-            return [round(weights[i], 2) for i in range(n)]
+        # Strategy 2
+        idx1, idx2 = (0, 0)
+        for i in range(100):
+            weights[idx1] += 0.01
+            weights[half_n + idx2] -= 0.01
+            idx1 = (idx1 + 1) % half_n
+            idx2 = (idx2 + 1) % (n - half_n)
+
+        random.shuffle(weights)
+        print(weights)
+        return [round(weights[i], 2) for i in range(n)]
+
+    def __update_parameters__(self, candidate_history):
         return self.current_weights
