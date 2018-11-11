@@ -7,7 +7,7 @@ from time import sleep
 from dating_server import GameServer
 
 from clients.matchmaker_god import MatchMaker
-from clients.player import Player
+from clients.greedy_player import Player
 
 
 def init_matchmaker(name):
