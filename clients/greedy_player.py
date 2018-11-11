@@ -1,6 +1,6 @@
 import json
-from random import randint
-from random import shuffle
+from decimal import *
+import random
 
 from clients.client import Player
 
@@ -49,13 +49,26 @@ class Player(Player):
         Also the sum of negative weights must be -1 and the sum of positive weights must be 1.
         """
         if candidate_history == 0:
-            weights = [0.0] * self.n
+            n = self.n
+            half_n = (n + 1) // 2
+            weights = [0.0] * n
+
+            # Strategy 1
+            # for i in range(100):
+            #     rand_idx1 = random.randint(0, half_n - 1)
+            #     rand_idx2 = random.randint(half_n, n - 1)
+            #     weights[rand_idx1] += 0.01
+            #     weights[rand_idx2] -= 0.01
+
+            # Strategy 2
+            idx1, idx2 = (0, 0)
             for i in range(100):
-                rand_idx1 = randint(0, self.n / 2 - 1)
-                rand_idx2 = randint(self.n / 2, self.n - 1)
-                weights[rand_idx1] = round(weights[rand_idx1] + 0.01, 2)
-                weights[rand_idx2] = round(weights[rand_idx2] - 0.01, 2)
-            shuffle(weights)
+                weights[idx1] += 0.01
+                weights[half_n + idx2] -= 0.01
+                idx1 = (idx1 + 1) % half_n
+                idx2 = (idx2 + 1) % (n - half_n)
+
+            random.shuffle(weights)
             print(weights)
-            return weights         
+            return [round(weights[i], 2) for i in range(n)]
         return self.current_weights
