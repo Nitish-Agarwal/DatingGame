@@ -1,5 +1,4 @@
 import json
-from decimal import *
 import random
 
 from clients.client import Player
@@ -21,7 +20,7 @@ class Player(Player):
             new_weights = self.your_algorithm(0 if not response else self.candidate_history)
             self.client.send_data(json.dumps(new_weights))
             self.current_weights = new_weights
-            response = json.loads(self.client.receive_data(size=32368))
+            response = json.loads(self.client.receive_data(size=32368*2))
             if 'game_over' in response:
                 print("######## GAME OVER ########")
                 if response['match_found']:
