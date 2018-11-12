@@ -64,11 +64,6 @@ class MatchMaker(Player):
         n = self.n
         candidates = np.array(self.allHistory['candidates'], dtype = float)
         scores = np.array(self.allHistory['scores'])
-        #debug information which is very helpful
-        print("""
-            iter: """ + str(len(candidates)) + """
-
-            rank: """ + str(np.linalg.matrix_rank(candidates)))
         self.estimated_preferences = np.inner(np.linalg.pinv(candidates), scores)
         suggested_candidate = [0.0] * n
         for i in range(n):
@@ -77,8 +72,7 @@ class MatchMaker(Player):
         max_score = 0.0
         for i in range(100):
             candidate = copy.deepcopy(suggested_candidate)
-            for j in range(n):
-                idx = random.randint(0, n - 1)
+            for idx in range(n):
                 if candidate[idx] > 0:
                     candidate[idx] -= self.__noise__(n, len(candidates), 59 - len(candidates))
                 else:
@@ -96,4 +90,4 @@ class MatchMaker(Player):
         return self.__first_candidate__()
 
     def __noise__(self, n, num_candidates, iters_left):
-        return 0.1
+        return 0.03 * random.random()
