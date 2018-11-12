@@ -56,21 +56,21 @@ class Player(Player):
         n = self.n
         half_n = (n + 1) // 2
         weights = [0.0] * n
-
-        # Strategy 1
-        # for i in range(100):
-        #     rand_idx1 = random.randint(0, half_n - 1)
-        #     rand_idx2 = random.randint(half_n, n - 1)
-        #     weights[rand_idx1] += 0.01
-        #     weights[rand_idx2] -= 0.01
-
-        # Strategy 2
-        idx1, idx2 = (0, 0)
-        for i in range(100):
-            weights[idx1] += 0.01
-            weights[half_n + idx2] -= 0.01
-            idx1 = (idx1 + 1) % half_n
-            idx2 = (idx2 + 1) % (n - half_n)
+        if n < 100:
+            # Strategy 1
+            for i in range(100):
+                rand_idx1 = random.randint(0, half_n - 1)
+                rand_idx2 = random.randint(half_n, n - 1)
+                weights[rand_idx1] += 0.01
+                weights[rand_idx2] -= 0.01
+        else:
+            # Strategy 2
+            idx1, idx2 = (0, 0)
+            for i in range(100):
+                weights[idx1] += 0.01
+                weights[half_n + idx2] -= 0.01
+                idx1 = (idx1 + 1) % half_n
+                idx2 = (idx2 + 1) % (n - half_n)
 
         random.shuffle(weights)
         print(weights)

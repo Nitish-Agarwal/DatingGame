@@ -64,31 +64,16 @@ class MatchMaker(Player):
         n = self.n
         candidates = np.array(self.allHistory['candidates'], dtype = float)
         scores = np.array(self.allHistory['scores'])
-        self.estimated_preferences = np.inner(np.linalg.pinv(candidates + 1E-7*np.random.random(candidates.shape)), scores)
+        noise = 1E-7 * np.random.random(candidates.shape)
+        self.estimated_preferences = np.inner(np.linalg.pinv(candidates + noise), scores)
         suggested_candidate = [0.0] * n
         for i in range(n):
             if self.estimated_preferences[i] > 0:
                 suggested_candidate[i] = 1.0
-        """max_score = 0.0
-        for i in range(100):
-            candidate = copy.deepcopy(suggested_candidate)
-            for idx in range(n):
-                if candidate[idx] > 0:
-                    candidate[idx] -= self.__noise__(n, len(candidates), 59 - len(candidates))
-                else:
-                    candidate[idx] += self.__noise__(n, len(candidates), 59 - len(candidates))
-            score = np.inner(np.array(candidate), np.array(self.estimated_preferences))
-            if score > max_score:
-                max_score = score
-                suggested_candidate = copy.deepcopy(candidate)
-        return [round(suggested_candidate[i], 4) for i in range(n)]"""
-        return suggested_candidate
+        return [round(suggested_candidate[i], 4) for i in range(n)]
 
     def __subsequent_candidates__(self):
         newCandidate = copy.deepcopy(self.prev_candidate['candidate'])
         self.allHistory['candidates'].append(newCandidate)
         self.allHistory['scores'].append(self.prev_candidate['score'])
         return self.__first_candidate__()
-
-    def __noise__(self, n, num_candidates, iters_left):
-        return 0.0
