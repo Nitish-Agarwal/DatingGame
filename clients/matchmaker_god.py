@@ -1,6 +1,7 @@
 import json
-from random import random
+import random
 import numpy as np
+import copy
 
 from clients.client import Player
 
@@ -11,12 +12,19 @@ class MatchMaker(Player):
         game_info = json.loads(self.client.receive_data(size=32368*2))
         print('Matchmaker', game_info)
         self.random_candidates_and_scores = game_info['randomCandidateAndScores']
+
+        # constructing allHistory
+        self.allHistory = {'candidates':[], 'scores':[]}
+        for index in self.random_candidates_and_scores:
+            item = self.random_candidates_and_scores[index]
+            self.allHistory['candidates'].append(item['Attributes'])
+            self.allHistory['scores'].append(item['Score'])
+
         self.n = game_info['n']
-        self.prev_candidate = {'candidate': [], 'score': 0, 'iter': -1}
+        self.prev_candidate = {'candidate': [], 'score': 0, 'iter': 0}
         self.time_left = 120
 
     def play_game(self):
-
         while True:
             candidate = self.my_candidate()
             self.client.send_data(json.dumps(candidate))
@@ -47,24 +55,45 @@ class MatchMaker(Player):
         For this function, you must return an array of values that lie between 0 and 1 inclusive and must have four or
         fewer digits of precision. The length of the array should be equal to the number of attributes (self.n)
         """
-        if self.prev_candidate['iter'] == -1:
+        if self.prev_candidate['iter'] == 0:
             return self.__first_candidate__()
         else:
             return self.__subsequent_candidates__()
 
     def __first_candidate__(self):
         n = self.n
-        candidates = np.array([self.random_candidates_and_scores[str(i)]['Attributes'] for i in range(40)])
-        scores = np.array([self.random_candidates_and_scores[str(i)]['Score'] for i in range(40)])
-        if np.linalg.matrix_rank(candidates) == n:
-            self.estimated_preferences = np.inner(np.linalg.pinv(candidates), scores)
-            suggested_candidate = [0.0] * n
-            for i in range(n):
-                if self.estimated_preferences[i] > 0.0:
-                    suggested_candidate[i] = 1.0
-            return suggested_candidate
-        else:
-            return [round(random(), 4) for i in range(n)]
+        candidates = np.array(self.allHistory['candidates'], dtype = float)
+        scores = np.array(self.allHistory['scores'])
+        #debug information which is very helpful
+        print("""
+            iter: """ + str(len(candidates)) + """
+
+            rank: """ + str(np.linalg.matrix_rank(candidates)))
+        self.estimated_preferences = np.inner(np.linalg.pinv(candidates), scores)
+        suggested_candidate = [0.0] * n
+        for i in range(n):
+            if self.estimated_preferences[i] > 0:
+                suggested_candidate[i] = 1.0
+        max_score = 0.0
+        for i in range(100):
+            candidate = copy.deepcopy(suggested_candidate)
+            for j in range(n):
+                idx = random.randint(0, n - 1)
+                if candidate[idx] > 0:
+                    candidate[idx] -= self.__noise__(n, len(candidates), 59 - len(candidates))
+                else:
+                    candidate[idx] += self.__noise__(n, len(candidates), 59 - len(candidates))
+            score = np.inner(np.array(candidate), np.array(self.estimated_preferences))
+            if score > max_score:
+                max_score = score
+                suggested_candidate = copy.deepcopy(candidate)
+        return [round(suggested_candidate[i], 4) for i in range(n)]
 
     def __subsequent_candidates__(self):
-        return [round(random(), 4) for i in range(self.n)]
+        newCandidate = copy.deepcopy(self.prev_candidate['candidate'])
+        self.allHistory['candidates'].append(newCandidate)
+        self.allHistory['scores'].append(self.prev_candidate['score'])
+        return self.__first_candidate__()
+
+    def __noise__(self, n, num_candidates, iters_left):
+        return 0.1
