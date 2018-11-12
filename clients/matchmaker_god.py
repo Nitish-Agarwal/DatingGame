@@ -2,7 +2,7 @@ import json
 import random
 import numpy as np
 import copy
-
+from math import sqrt
 from clients.client import Player
 
 
@@ -64,12 +64,12 @@ class MatchMaker(Player):
         n = self.n
         candidates = np.array(self.allHistory['candidates'], dtype = float)
         scores = np.array(self.allHistory['scores'])
-        self.estimated_preferences = np.inner(np.linalg.pinv(candidates), scores)
+        self.estimated_preferences = np.inner(np.linalg.pinv(candidates + 1E-7*np.random.random(candidates.shape)), scores)
         suggested_candidate = [0.0] * n
         for i in range(n):
             if self.estimated_preferences[i] > 0:
                 suggested_candidate[i] = 1.0
-        max_score = 0.0
+        """max_score = 0.0
         for i in range(100):
             candidate = copy.deepcopy(suggested_candidate)
             for idx in range(n):
@@ -81,7 +81,8 @@ class MatchMaker(Player):
             if score > max_score:
                 max_score = score
                 suggested_candidate = copy.deepcopy(candidate)
-        return [round(suggested_candidate[i], 4) for i in range(n)]
+        return [round(suggested_candidate[i], 4) for i in range(n)]"""
+        return suggested_candidate
 
     def __subsequent_candidates__(self):
         newCandidate = copy.deepcopy(self.prev_candidate['candidate'])
@@ -90,4 +91,4 @@ class MatchMaker(Player):
         return self.__first_candidate__()
 
     def __noise__(self, n, num_candidates, iters_left):
-        return 0.03 * random.random()
+        return 0.0
