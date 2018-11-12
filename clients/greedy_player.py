@@ -49,7 +49,7 @@ class Player(Player):
         """
         if candidate_history == 0:
             return self.__initial_parameters__()
-        else
+        else:
             return self.__update_parameters__(candidate_history)
 
     def __initial_parameters__(self):

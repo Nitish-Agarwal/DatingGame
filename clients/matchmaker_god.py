@@ -12,7 +12,7 @@ class MatchMaker(Player):
         print('Matchmaker', game_info)
         self.random_candidates_and_scores = game_info['randomCandidateAndScores']
         self.n = game_info['n']
-        self.prev_candidate = {'candidate': [], 'score': 0, 'iter': 0}
+        self.prev_candidate = {'candidate': [], 'score': 0, 'iter': -1}
         self.time_left = 120
 
     def play_game(self):
@@ -47,13 +47,24 @@ class MatchMaker(Player):
         For this function, you must return an array of values that lie between 0 and 1 inclusive and must have four or
         fewer digits of precision. The length of the array should be equal to the number of attributes (self.n)
         """
-        if self.prev_candidate['iter'] == 0:
+        if self.prev_candidate['iter'] == -1:
             return self.__first_candidate__()
         else:
             return self.__subsequent_candidates__()
 
     def __first_candidate__(self):
-        return return [round(random(), 4) for i in range(self.n)]
+        n = self.n
+        candidates = np.array([self.random_candidates_and_scores[str(i)]['Attributes'] for i in range(40)])
+        scores = np.array([self.random_candidates_and_scores[str(i)]['Score'] for i in range(40)])
+        if np.linalg.matrix_rank(candidates) == n:
+            self.estimated_preferences = np.inner(np.linalg.pinv(candidates), scores)
+            suggested_candidate = [0.0] * n
+            for i in range(n):
+                if self.estimated_preferences[i] > 0.0:
+                    suggested_candidate[i] = 1.0
+            return suggested_candidate
+        else:
+            return [round(random(), 4) for i in range(n)]
 
-    def __subsequent_candidate__(self):
+    def __subsequent_candidates__(self):
         return [round(random(), 4) for i in range(self.n)]
